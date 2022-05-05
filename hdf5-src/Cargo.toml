@@ -45,7 +45,7 @@ threadsafe = []
 1_13 = []
 
 [dependencies]
-libz-sys = { version = "1.0.25", features = ["static"], optional = true, default-features=false }
+libz-sys = { version = "1.0.25", features = ["static", "libc"], optional = true, default-features=false }
 
 [build-dependencies]
 cmake = "0.1.44"
