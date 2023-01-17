@@ -291,7 +291,7 @@ extern "C" {
 pub type H5D_chunk_iter_op_t = Option<
     extern "C" fn(
         offset: *const hsize_t,
-        #[cfg(feature = "1.14.0")] filter_mask: c_unsigned,
+        #[cfg(feature = "1.14.0")] filter_mask: c_uint,
         #[cfg(not(feature = "1.14.0"))] filter_mask: u32,
         addr: haddr_t,
         #[cfg(not(feature = "1.14.0"))] nbytes: u32,

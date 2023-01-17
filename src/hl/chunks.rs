@@ -103,7 +103,7 @@ mod one_thirteen {
     }
 
     extern "C" fn chunks_callback<F>(
-        offset: *const hsize_t, filter_mask: c_unsiged, addr: haddr_t, size: hsize_t,
+        offset: *const hsize_t, filter_mask: c_uint, addr: haddr_t, size: hsize_t,
         op_data: *mut c_void,
     ) -> herr_t
     where
@@ -121,7 +121,7 @@ mod one_thirteen {
                     offset,
                     filter_mask,
                     addr: addr as u64,
-                    size: nbytes as u64,
+                    size: size as u64,
                 };
 
                 callback(info)
