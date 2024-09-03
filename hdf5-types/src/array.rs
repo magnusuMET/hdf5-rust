@@ -195,13 +195,22 @@ impl<T> LeakyVarLenArray<T> {
     }
 
     /// Drop this variable length array.
-    /// OBS: Not recursive, not called automatically
+    /// OBS: Not called automatically
     pub fn drop(&mut self) {
         if self.ptr.is_null() {
             return;
         }
 
-        // unsafe { crate::free(self.ptr) }
+        if std::mem::needs_drop::<T>() {
+            for offset in 0..self.len() {
+                unsafe {
+                    std::ptr::drop_in_place(self.ptr.cast::<T>().offset(offset as isize));
+                }
+            }
+        }
+
+        unsafe { crate::free(self.ptr) }
+
         self.ptr = std::ptr::null_mut();
         self.len = 0;
     }
