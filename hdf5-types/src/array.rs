@@ -148,8 +148,12 @@ unsafe impl<T: Copy + Send> Send for VarLenArray<T> {}
 unsafe impl<T: Copy + Sync> Sync for VarLenArray<T> {}
 
 /// Variant of VarLenArray which allows nested
-/// derives of `H5Type`. This does not free memory
+/// derives of `H5Type`, as the type itself is `Copy`.
+/// This type does not free memory automatically,
 /// which must be done by the user.
+/// Mutable methods on this type are marked unsafe
+/// as we do not guarantee single ownership of
+/// the backing memory (due to `Copy`)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct LeakyVarLenArray<T> {
@@ -168,7 +172,7 @@ impl<T> LeakyVarLenArray<T> {
         self.ptr.cast()
     }
     #[inline]
-    pub fn as_mut_ptr(&self) -> *mut T {
+    pub unsafe fn as_mut_ptr(&mut self) -> *mut T {
         self.ptr.cast()
     }
     #[inline]
@@ -181,7 +185,7 @@ impl<T> LeakyVarLenArray<T> {
         }
     }
     #[inline]
-    pub fn as_mut_slice(&self) -> &mut [T] {
+    pub unsafe fn as_mut_slice(&mut self) -> &mut [T] {
         let len = self.len;
         if len == 0 {
             &mut []
@@ -196,7 +200,7 @@ impl<T> LeakyVarLenArray<T> {
 
     /// Drop this variable length array.
     /// OBS: Not called automatically
-    pub fn drop(&mut self) {
+    pub unsafe fn drop(&mut self) {
         if self.ptr.is_null() {
             return;
         }
