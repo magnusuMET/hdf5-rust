@@ -3,7 +3,7 @@ use std::mem;
 use std::os::raw::c_void;
 use std::ptr;
 
-use crate::array::VarLenArray;
+use crate::array::{LeakyVarLenArray, VarLenArray};
 use crate::string::{FixedAscii, FixedUnicode, VarLenAscii, VarLenUnicode};
 
 #[allow(non_camel_case_types)]
@@ -372,6 +372,12 @@ unsafe impl H5Type for VarLenUnicode {
     #[inline]
     fn type_descriptor() -> TypeDescriptor {
         TypeDescriptor::VarLenUnicode
+    }
+}
+
+unsafe impl<T: H5Type> H5Type for LeakyVarLenArray<T> {
+    fn type_descriptor() -> TypeDescriptor {
+        TypeDescriptor::VarLenArray(Box::new(<T as H5Type>::type_descriptor()))
     }
 }
 

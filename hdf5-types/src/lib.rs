@@ -21,7 +21,7 @@ mod string;
 #[cfg(feature = "complex")]
 mod complex;
 
-pub use self::array::VarLenArray;
+pub use self::array::{LeakyVarLenArray, VarLenArray};
 pub use self::dyn_value::{DynValue, OwnedDynValue};
 pub use self::h5type::{
     CompoundField, CompoundType, EnumMember, EnumType, FloatSize, H5Type, IntSize, TypeDescriptor,

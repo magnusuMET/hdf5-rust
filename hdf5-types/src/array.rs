@@ -1,3 +1,4 @@
+use std::ffi::c_void;
 use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
@@ -146,9 +147,75 @@ unsafe impl<T: Copy + Send> Send for VarLenArray<T> {}
 // Safety: `VarLenArray` has no interior mutability
 unsafe impl<T: Copy + Sync> Sync for VarLenArray<T> {}
 
+/// Variant of VarLenArray which allows nested
+/// derives of `H5Type`. This does not free memory
+/// which must be done by the user.
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct LeakyVarLenArray<T> {
+    len: usize,
+    ptr: *mut c_void,
+    ph: PhantomData<*const T>,
+}
+
+impl<T> LeakyVarLenArray<T> {
+    #[inline]
+    pub fn len(&self) -> usize {
+        self.len
+    }
+    #[inline]
+    pub fn as_ptr(&self) -> *const T {
+        self.ptr.cast()
+    }
+    #[inline]
+    pub fn as_mut_ptr(&self) -> *mut T {
+        self.ptr.cast()
+    }
+    #[inline]
+    pub fn as_slice(&self) -> &[T] {
+        let len = self.len;
+        if len == 0 {
+            &[]
+        } else {
+            unsafe { std::slice::from_raw_parts(self.as_ptr(), len) }
+        }
+    }
+    #[inline]
+    pub fn as_mut_slice(&self) -> &mut [T] {
+        let len = self.len;
+        if len == 0 {
+            &mut []
+        } else {
+            unsafe { std::slice::from_raw_parts_mut(self.as_mut_ptr(), len) }
+        }
+    }
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+
+    /// Drop this variable length array.
+    /// OBS: Not recursive, not called automatically
+    pub fn drop(&mut self) {
+        if self.ptr.is_null() {
+            return;
+        }
+
+        // unsafe { crate::free(self.ptr) }
+        self.ptr = std::ptr::null_mut();
+        self.len = 0;
+    }
+}
+
+// Safety: Memory backed by `VarLenArray` can be accessed and freed from any thread
+unsafe impl<T: Copy + Send> Send for LeakyVarLenArray<T> {}
+// Safety: `VarLenArray` has no interior mutability
+unsafe impl<T: Copy + Sync> Sync for LeakyVarLenArray<T> {}
+
 #[cfg(test)]
 pub mod tests {
-    use super::VarLenArray;
+    use super::{LeakyVarLenArray, VarLenArray};
+    use crate::H5Type;
 
     type S = VarLenArray<u16>;
 
@@ -184,5 +251,17 @@ pub mod tests {
         assert_eq!(a, a);
         let v: Vec<_> = a.iter().cloned().collect();
         assert_eq!(v, vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn impl_for_leaky_type() {
+        type Stuff = LeakyVarLenArray<LeakyVarLenArray<LeakyVarLenArray<i32>>>;
+        // #[repr(C)]
+        // #[derive(Copy, Clone)]
+        // struct Stuff {
+        //     a: LeakyVarLenArray<LeakyVarLenArray<i32>>,
+        // }
+
+        println!("{:?}", <Stuff as H5Type>::type_descriptor());
     }
 }
