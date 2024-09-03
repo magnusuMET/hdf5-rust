@@ -724,7 +724,7 @@ pub mod tests {
 
     macro_rules! test_quickcheck_ascii {
         ($test_name:ident, $ty:ident) => {
-            quickcheck! {
+            quickcheck::quickcheck! {
                 fn $test_name(b: AsciiGen) -> () {
                     let (exp, bytes) = (b.expected(), b.as_bytes());
                     let s = $ty::from_ascii(bytes).unwrap();
@@ -745,7 +745,7 @@ pub mod tests {
 
     macro_rules! test_quickcheck_unicode {
         ($test_name:ident, $ty:ident) => {
-            quickcheck! {
+            quickcheck::quickcheck! {
                 fn $test_name(b: UnicodeGen) -> () {
                     let (exp, bytes) = (b.expected(), b.as_bytes());
                     let s = $ty::from_str(exp.as_str()).unwrap();

@@ -13,10 +13,6 @@
 //!                     or if `hdf5-c` is compiled with the MEMCHECKER option.
 //!                     This option is forced on in the case of using a `windows` DLL.
 
-#[cfg(test)]
-#[macro_use]
-extern crate quickcheck;
-
 mod array;
 pub mod dyn_value;
 mod h5type;

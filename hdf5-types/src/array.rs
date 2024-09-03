@@ -8,7 +8,7 @@ use std::slice;
 #[repr(C)]
 pub struct VarLenArray<T: Copy> {
     len: usize,
-    ptr: *const T,
+    ptr: *const u8,
     tag: PhantomData<T>,
 }
 
@@ -31,7 +31,7 @@ impl<T: Copy> VarLenArray<T> {
 
     #[inline]
     pub fn as_ptr(&self) -> *const T {
-        self.ptr
+        self.ptr.cast()
     }
 
     #[inline]
@@ -52,15 +52,14 @@ impl<T: Copy> VarLenArray<T> {
 
 impl<T: Copy> Drop for VarLenArray<T> {
     fn drop(&mut self) {
-        if !self.ptr.is_null() {
-            unsafe {
-                crate::free(self.ptr as *mut _);
-            }
-            self.ptr = ptr::null();
-            if self.len != 0 {
-                self.len = 0;
-            }
+        if self.ptr.is_null() {
+            return;
         }
+        unsafe {
+            crate::free(self.ptr.cast_mut().cast());
+        }
+        self.ptr = ptr::null();
+        self.len = 0;
     }
 }
 
