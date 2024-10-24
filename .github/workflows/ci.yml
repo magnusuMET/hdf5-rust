@@ -110,9 +110,9 @@ jobs:
           - {os: macos-latest, version: 1.12.0, channel: conda-forge, rust: stable}
           - {os: windows-latest, version: 1.12.0, channel: conda-forge, rust: stable}
           - {os: ubuntu-latest, version: 1.12.1, channel: conda-forge, rust: stable}
-          - {os: macos-latest, version: 1.14.0, channel: conda-forge, rust: stable}
-          - {os: windows-latest, version: 1.14.0, channel: conda-forge, rust: stable}
-          - {os: ubuntu-latest, version: 1.14.0, channel: conda-forge, rust: stable}
+          - {os: macos-latest, version: 1.14.4, channel: conda-forge, rust: stable}
+          - {os: windows-latest, version: 1.14.4, channel: conda-forge, rust: stable}
+          - {os: ubuntu-latest, version: 1.14.4, channel: conda-forge, rust: stable}
     defaults:
       run:
         shell: bash -l {0}
@@ -293,22 +293,22 @@ jobs:
         run:
           cargo test --workspace -vv --features=hdf5-sys/static,hdf5-sys/zlib --exclude=hdf5-metno-derive
 
-  # wine:
-  #   name: wine
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with: {submodules: true}
-  #     - name: Install Rust
-  #       uses: dtolnay/rust-toolchain@stable
-  #       with: {toolchain: stable, targets: x86_64-pc-windows-gnu}
-  #     - name: Install dependencies
-  #       run: sudo apt-get update && sudo apt install wine64 mingw-w64
-  #     - name: Build and test
-  #       env:
-  #         CARGO_TARGET_X86_64_PC_WINDOWS_GNU_RUNNER: wine64
-  #       run: cargo test --workspace --features hdf5-sys/static --target x86_64-pc-windows-gnu --exclude=hdf5-metno-derive
+  wine:
+    name: wine
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: {submodules: true}
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with: {toolchain: stable, targets: x86_64-pc-windows-gnu}
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt install wine64 mingw-w64
+      - name: Build and test
+        env:
+          CARGO_TARGET_X86_64_PC_WINDOWS_GNU_RUNNER: wine64
+        run: cargo test --workspace --features hdf5-sys/static --target x86_64-pc-windows-gnu --exclude=hdf5-metno-derive
 
   addr_san:
     name: Address sanitizer
